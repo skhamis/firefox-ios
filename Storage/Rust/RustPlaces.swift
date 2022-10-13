@@ -43,7 +43,7 @@ public class RustPlaces: BookmarksHandler {
             notificationCenter.post(name: .RustPlacesOpened, object: nil)
             return nil
         } catch let err as NSError {
-            if let placesError = err as? PlacesError {
+            if let placesError = err as? PlacesApiError {
                 SentryIntegration.shared.sendWithStacktrace(
                     message: "Places error when opening Rust Places database",
                     tag: SentryTag.rustPlaces,
@@ -324,7 +324,7 @@ public class RustPlaces: BookmarksHandler {
                 try _ = self.api?.syncBookmarks(unlockInfo: unlockInfo)
                 deferred.fill(Maybe(success: ()))
             } catch let err as NSError {
-                if let placesError = err as? PlacesError {
+                if let placesError = err as? PlacesApiError {
                     SentryIntegration.shared.sendWithStacktrace(
                         message: "Places error when syncing Places database",
                         tag: SentryTag.rustPlaces,
