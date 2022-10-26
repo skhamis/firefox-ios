@@ -469,25 +469,24 @@ public class RustLoginEncryptionKeys {
         errorDomain: String,
         errorMessage: String
     ) {
-        var errDescription: String
-        var errMessage: String
-
-        switch err {
-        case .InvalidRecord(let message),
-        .NoSuchRecord(let message),
-        .IncorrectKey(let message),
-        .Interrupted(let message),
-        .SyncAuthInvalid(let message),
-        .UnexpectedLoginsApiError(let message):
-            errMessage = message
-            errDescription = err.descriptionValue
-        }
+        var message: String {
+             switch err {
+                 case .InvalidRecord(let message),
+                      .NoSuchRecord(let message),
+                      .Interrupted(let message),
+                      .SyncAuthInvalid(let message),
+                      .UnexpectedLoginsApiError(let message):
+                          return message
+                  case .IncorrectKey:
+                      return "Incorrect key"
+             }
+          }
 
         SentryIntegration.shared.sendWithStacktrace(
             message: errorMessage,
             tag: SentryTag.rustLogins,
             severity: .error,
-            description: "\(errorDomain) - \(errDescription): \(errMessage)")
+            description: "\(errorDomain) - \(err.descriptionValue): \(message)")
     }
 }
 
@@ -587,7 +586,7 @@ public class RustLogins {
 
         queue.async {
             guard self.isOpen else {
-                let error = LoginsStoreError.UnexpectedLoginsApiError(message: "Database is closed")
+                let error = LoginsStoreError.UnexpectedLoginsApiError(reason: "Database is closed")
                 deferred.fill(Maybe(failure: error as MaybeErrorType))
                 return
             }
@@ -625,7 +624,7 @@ public class RustLogins {
 
         queue.async {
             guard self.isOpen else {
-                let error = LoginsStoreError.UnexpectedLoginsApiError(message: "Database is closed")
+                let error = LoginsStoreError.UnexpectedLoginsApiError(reason: "Database is closed")
                 deferred.fill(Maybe(failure: error as MaybeErrorType))
                 return
             }
@@ -709,7 +708,7 @@ public class RustLogins {
 
         queue.async {
             guard self.isOpen else {
-                let error = LoginsStoreError.UnexpectedLoginsApiError(message: "Database is closed")
+                let error = LoginsStoreError.UnexpectedLoginsApiError(reason: "Database is closed")
                 deferred.fill(Maybe(failure: error as MaybeErrorType))
                 return
             }
@@ -730,7 +729,7 @@ public class RustLogins {
 
         queue.async {
             guard self.isOpen else {
-                let error = LoginsStoreError.UnexpectedLoginsApiError(message: "Database is closed")
+                let error = LoginsStoreError.UnexpectedLoginsApiError(reason: "Database is closed")
                 deferred.fill(Maybe(failure: error as MaybeErrorType))
                 return
             }
@@ -752,7 +751,7 @@ public class RustLogins {
 
         queue.async {
             guard self.isOpen else {
-                let error = LoginsStoreError.UnexpectedLoginsApiError(message: "Database is closed")
+                let error = LoginsStoreError.UnexpectedLoginsApiError(reason: "Database is closed")
                 deferred.fill(Maybe(failure: error as MaybeErrorType))
                 return
             }
@@ -773,7 +772,7 @@ public class RustLogins {
 
         queue.async {
             guard self.isOpen else {
-                let error = LoginsStoreError.UnexpectedLoginsApiError(message: "Database is closed")
+                let error = LoginsStoreError.UnexpectedLoginsApiError(reason: "Database is closed")
                 deferred.fill(Maybe(failure: error as MaybeErrorType))
                 return
             }
@@ -799,7 +798,7 @@ public class RustLogins {
 
         queue.async {
             guard self.isOpen else {
-                let error = LoginsStoreError.UnexpectedLoginsApiError(message: "Database is closed")
+                let error = LoginsStoreError.UnexpectedLoginsApiError(reason: "Database is closed")
                 deferred.fill(Maybe(failure: error as MaybeErrorType))
                 return
             }
@@ -820,7 +819,7 @@ public class RustLogins {
 
         queue.async {
             guard self.isOpen else {
-                let error = LoginsStoreError.UnexpectedLoginsApiError(message: "Database is closed")
+                let error = LoginsStoreError.UnexpectedLoginsApiError(reason: "Database is closed")
                 deferred.fill(Maybe(failure: error as MaybeErrorType))
                 return
             }
@@ -841,7 +840,7 @@ public class RustLogins {
 
         queue.async {
             guard self.isOpen else {
-                let error = LoginsStoreError.UnexpectedLoginsApiError(message: "Database is closed")
+                let error = LoginsStoreError.UnexpectedLoginsApiError(reason: "Database is closed")
                 deferred.fill(Maybe(failure: error as MaybeErrorType))
                 return
             }

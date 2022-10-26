@@ -74,7 +74,7 @@ public class RustPlaces: BookmarksHandler {
 
         writerQueue.async {
             guard self.isOpen else {
-                deferred.fill(Maybe(failure: PlacesApiError.connUseAfterApiClosed as MaybeErrorType))
+                deferred.fill(Maybe(failure: PlacesConnectionError.connUseAfterApiClosed as MaybeErrorType))
                 return
             }
 
@@ -90,7 +90,7 @@ public class RustPlaces: BookmarksHandler {
                     deferred.fill(Maybe(failure: error as MaybeErrorType))
                 }
             } else {
-                deferred.fill(Maybe(failure: PlacesApiError.connUseAfterApiClosed as MaybeErrorType))
+                deferred.fill(Maybe(failure: PlacesConnectionError.connUseAfterApiClosed as MaybeErrorType))
             }
         }
 
@@ -102,7 +102,7 @@ public class RustPlaces: BookmarksHandler {
 
         readerQueue.async {
             guard self.isOpen else {
-                deferred.fill(Maybe(failure: PlacesApiError.connUseAfterApiClosed as MaybeErrorType))
+                deferred.fill(Maybe(failure: PlacesConnectionError.connUseAfterApiClosed as MaybeErrorType))
                 return
             }
 
@@ -122,7 +122,7 @@ public class RustPlaces: BookmarksHandler {
                     deferred.fill(Maybe(failure: error as MaybeErrorType))
                 }
             } else {
-                deferred.fill(Maybe(failure: PlacesApiError.connUseAfterApiClosed as MaybeErrorType))
+                deferred.fill(Maybe(failure: PlacesConnectionError.connUseAfterApiClosed as MaybeErrorType))
             }
         }
 
@@ -316,7 +316,7 @@ public class RustPlaces: BookmarksHandler {
 
         writerQueue.async {
             guard self.isOpen else {
-                deferred.fill(Maybe(failure: PlacesApiError.connUseAfterApiClosed as MaybeErrorType))
+                deferred.fill(Maybe(failure: PlacesConnectionError.connUseAfterApiClosed as MaybeErrorType))
                 return
             }
 
@@ -350,7 +350,7 @@ public class RustPlaces: BookmarksHandler {
 
         writerQueue.async {
             guard self.isOpen else {
-                deferred.fill(Maybe(failure: PlacesApiError.connUseAfterApiClosed as MaybeErrorType))
+                deferred.fill(Maybe(failure: PlacesConnectionError.connUseAfterApiClosed as MaybeErrorType))
                 return
             }
 
