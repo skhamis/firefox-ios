@@ -171,4 +171,41 @@ class RustAutofillTests: XCTestCase {
 
         waitForExpectations(timeout: 3, handler: nil)
     }
+
+    func addAddress(completion: @escaping (Address?, Error?) -> Void) {
+        let address = UpdatableAddressFields(
+            givenName: "Jane",
+            additionalName: "",
+            familyName: "Doe",
+            organization: "",
+            streetAddress: "123 Second Avenue",
+            addressLevel3: "",
+            addressLevel2: "Chicago, IL",
+            addressLevel1: "",
+            postalCode: "",
+            country: "United States",
+            tel: "",
+            email: "")
+        return autofill.addAddress(address: address, completion: completion)
+    }
+
+    func testAddress() {
+        let expectationAddAddress = expectation(description: "completed add address")
+        let expectationGetAddress = expectation(description: "completed getting address")
+
+        addAddress { address, err in
+            XCTAssertNotNil(address)
+            XCTAssertNil(err)
+            expectationAddAddress.fulfill()
+
+            self.autofill.getAddress(id: address!.guid) { addr, error in
+                XCTAssertNotNil(addr)
+                XCTAssertNil(err)
+                XCTAssertEqual(address!.guid, addr!.guid)
+                expectationGetAddress.fulfill()
+            }
+        }
+
+        waitForExpectations(timeout: 3, handler: nil)
+    }
 }

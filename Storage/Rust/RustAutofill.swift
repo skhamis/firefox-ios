@@ -529,4 +529,47 @@ public class RustAutofill {
         // handles all cases
         throw AutofillEncryptionKeyError.illegalState
     }
+
+    
+    /// Address Autofill API wrappers around the Rust APIs
+    
+    public func addAddress(address: UpdatableAddressFields, completion: @escaping (Address?, Error?) -> Void) {
+        queue.async {
+            guard self.isOpen else {
+                let error = AutofillApiError.UnexpectedAutofillApiError(
+                    reason: "Database is closed")
+                completion(nil, error)
+                return
+            }
+
+            do {
+                // self.storage is the autofill storage class, this actually calls the rust
+                let id = try self.storage?.addAddress(a: address)
+                // This completion paradigm is used in credit cards so i'm using it here, but it's not required
+                // you could easily just return the id in the line above
+                completion(id!, nil)
+            } catch let err as NSError {
+                completion(nil, err)
+            }
+        }
+    }
+
+    public func getAddress(id: String, completion: @escaping (Address?, Error?) -> Void) {
+        queue.async {
+            guard self.isOpen else {
+                let error = AutofillApiError.UnexpectedAutofillApiError(
+                    reason: "Database is closed")
+                completion(nil, error)
+                return
+            }
+
+            do {
+                let record = try self.storage?.getAddress(guid: id)
+                completion(record, nil)
+            } catch let err as NSError {
+                completion(nil, err)
+            }
+        }
+    }
+
 }
