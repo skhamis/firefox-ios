@@ -161,6 +161,14 @@ public class RustRemoteTabs {
             return deferMaybe(clientAndTabs)
         }
     }
+    
+    public func addRemoteTabsToPendingDelete(tabsPerDevice: [String: [String]]) {
+        // For each item in the dictionary, add a new row to the DB in Rust
+        self.logger.log("We are adding tabs to the DB", level: .warning, category: .tabs)
+        // let tabs = localTabs.map { $0.toRemoteTabRecord() }
+        // if let storage = self.storage {
+        // storage.setLocalTabs(remoteTabs: tabs)
+    }
 
     public func registerWithSyncManager() {
         queue.async { [unowned self] in

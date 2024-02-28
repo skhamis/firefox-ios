@@ -189,7 +189,27 @@ class RemoteTabsTableViewController: UITableViewController,
         guard longPressGestureRecognizer.state == .began else { return }
         let touchPoint = longPressGestureRecognizer.location(in: tableView)
         guard let indexPath = tableView.indexPathForRow(at: touchPoint) else { return }
-        presentContextMenu(for: indexPath)
+        let menu = UIAlertController(title: nil, message: "Choose option", preferredStyle: .actionSheet)
+
+            let closeAction = UIAlertAction(title: "Remotely close this tab", style: .destructive) { [weak self] _ in
+                guard let self = self else { return }
+                self.closeTab(at: indexPath)
+            }
+            menu.addAction(closeAction)
+
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            menu.addAction(cancelAction)
+
+            present(menu, animated: true, completion: nil)
+
+        // presentContextMenu(for: indexPath)
+    }
+
+    private func closeTab(at indexPath: IndexPath) {
+        // do close tab stuff
+        print("closing this tab!")
+        let tab = state.clientAndTabs[indexPath.section].tabs[indexPath.item]
+        remoteTabsPanel?.handleCloseRemoteTab(tab.URL)
     }
 
     func hideTableViewSection(_ section: Int) {

@@ -87,6 +87,11 @@ class TabManagerMiddleware {
             let uuid = context.windowUUID
             self.openSelectedURL(url: url, windowUUID: uuid)
 
+        case RemoteTabsPanelAction.requestedCloseRemoteTab(let context):
+            let url = context.url
+            let uuid = context.windowUUID
+            self.closeRemoteTab(url: url, windowUUID: uuid)
+
         case TabPeekAction.didLoadTabPeek(let context):
             let tabID = context.tabUUID
             self.didLoadTabPeek(tabID: tabID, uuid: uuid)
@@ -125,6 +130,10 @@ class TabManagerMiddleware {
         let urlRequest = URLRequest(url: url)
         self.addNewTab(with: urlRequest, isPrivate: false, for: windowUUID)
         store.dispatch(TabTrayAction.dismissTabTray(windowUUID.context))
+    }
+    
+    private func closeRemoteTab(url: URL, windowUUID: WindowUUID) {
+        self.profile.closeRemoteTabs(["4c7601e14c055c4eae606b64dc8e0001": [url.absoluteString]])
     }
 
     /// Gets initial state for TabTrayModel includes panelType, if is on Private mode,

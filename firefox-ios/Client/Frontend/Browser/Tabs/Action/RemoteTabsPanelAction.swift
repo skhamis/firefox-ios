@@ -38,6 +38,7 @@ enum RemoteTabsPanelAction: Action {
     case refreshDidFail(RemoteTabsRefreshDidFailContext)
     case refreshDidSucceed(RemoteTabsRefreshSuccessContext)
     case openSelectedURL(URLActionContext)
+    case requestedCloseRemoteTab(URLActionContext)
 
     var windowUUID: UUID {
         switch self {
@@ -46,7 +47,8 @@ enum RemoteTabsPanelAction: Action {
                 .refreshDidBegin(let context),
                 .refreshDidFail(let context as ActionContext),
                 .refreshDidSucceed(let context as ActionContext),
-                .openSelectedURL(let context as ActionContext):
+                .openSelectedURL(let context as ActionContext),
+                .requestedCloseRemoteTab(let context as ActionContext):
             return context.windowUUID
         }
     }

@@ -5,6 +5,7 @@
 import Foundation
 import Shared
 
+// We can probably move this to rust?
 public struct ClientAndTabs: Equatable, CustomStringConvertible {
     public let client: RemoteClient
     public let tabs: [RemoteTab]

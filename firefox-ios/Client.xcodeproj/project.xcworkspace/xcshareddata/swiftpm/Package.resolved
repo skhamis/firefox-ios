@@ -93,10 +93,10 @@
     {
       "identity" : "rust-components-swift",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mozilla/rust-components-swift.git",
+      "location" : "file:///Users/skhamis/moz/rust-components-swift",
       "state" : {
-        "revision" : "e8697f9fa64537558dcf7cf2b14502eaa5f3770d",
-        "version" : "125.0.20240222050253"
+        "branch" : "remote-tabs-test",
+        "revision" : "13e695535a3c5de85d4e41cbf6902a46dbeff634"
       }
     },
     {

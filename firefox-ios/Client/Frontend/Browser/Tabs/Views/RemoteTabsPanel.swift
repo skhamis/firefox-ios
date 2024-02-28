@@ -155,4 +155,9 @@ class RemoteTabsPanel: UIViewController,
         let context = URLActionContext(url: url, windowUUID: windowUUID)
         store.dispatch(RemoteTabsPanelAction.openSelectedURL(context))
     }
+
+    func handleCloseRemoteTab(_ url: URL) {
+        let context = URLActionContext(url: url, windowUUID: windowUUID)
+        store.dispatch(RemoteTabsPanelAction.requestedCloseRemoteTab(context))
+    }
 }

@@ -130,6 +130,8 @@ protocol Profile: AnyObject {
 
     @discardableResult
     func storeTabs(_ tabs: [RemoteTab]) -> Deferred<Maybe<Int>>
+    
+    func closeRemoteTabs(_ tabsPerDevice: [String: [String]])
 
     func sendItem(_ item: ShareItem, toDevices devices: [RemoteDevice]) -> Success
     func pollCommands(forcePoll: Bool)
@@ -565,6 +567,22 @@ open class BrowserProfile: Profile {
 
     func storeTabs(_ tabs: [RemoteTab]) -> Deferred<Maybe<Int>> {
         return self.tabs.setLocalTabs(localTabs: tabs)
+    }
+
+    // tabsPerDevice is a dictionary of deviceID => [urls Closed]
+    // probably make a type for this in the future
+    public func closeRemoteTabs(_ tabsPerDevice: [String: [String]]) {
+        if let accountManager = RustFirefoxAccounts.shared.accountManager {
+            let constellation = accountManager.deviceConstellation()
+            tabsPerDevice.forEach {
+                let id = $0.key
+                let urls = $0.value
+                constellation?.sendEventToDevice(targetDeviceId: id, e: .closeRemoteTabs(urls: urls))
+            }
+        }
+
+        // Tell tabs that we're requesting to delete these tabs
+        self.tabs.addRemoteTabsToPendingDelete(tabsPerDevice: tabsPerDevice)
     }
 
     public func sendItem(_ item: ShareItem, toDevices devices: [RemoteDevice]) -> Success {
