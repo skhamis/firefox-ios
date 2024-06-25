@@ -7,7 +7,9 @@ import Shared
 import Common
 
 import class MozillaAppServices.TabsStore
+import class MozillaAppServices.RemoteCommandStore
 import enum MozillaAppServices.TabsApiError
+import enum MozillaAppServices.RemoteCommand
 import struct MozillaAppServices.ClientRemoteTabs
 import struct MozillaAppServices.RemoteTabRecord
 
@@ -15,6 +17,8 @@ public class RustRemoteTabs {
     let databasePath: String
     let queue: DispatchQueue
     var store: TabsStore?
+    var commandQueue: RemoteTabsCommandQueue?
+
     private(set) var isOpen = false
     private var didAttemptToMoveToBackup = false
     private let logger: Logger
@@ -30,11 +34,14 @@ public class RustRemoteTabs {
     private func open() -> NSError? {
         store = TabsStore(path: databasePath)
         isOpen = true
+        commandQueue = RemoteTabsCommandQueue()
+        commandQueue?.openCommandStore(tabsStore: store!)
         return nil
     }
 
     private func close() -> NSError? {
         store = nil
+        commandQueue = nil
         isOpen = false
         return nil
     }
@@ -164,6 +171,81 @@ public class RustRemoteTabs {
         queue.async { [unowned self] in
            self.store?.registerWithSyncManager()
         }
+    }
+
+    // MARK: Remote Command APIs
+    public func addRemoteCommand(deviceId: String, url: URL) -> Deferred<Maybe<Bool>> {
+        guard let commandQueue = self.commandQueue else {
+            let deferred = Deferred<Maybe<Bool>>()
+            deferred.fill(Maybe(
+                failure: TabsApiError.UnexpectedTabsError(reason: "Command queue is not initialized") as MaybeErrorType
+            ))
+            return deferred
+        }
+        return commandQueue.addRemoteCommand(deviceId: deviceId, command: RemoteCommand.closeTab(url: url.absoluteString))
+    }
+
+    public func removeRemoteCommand(deviceId: String, url: URL) -> Deferred<Maybe<Bool>> {
+        guard let commandQueue = self.commandQueue else {
+            let deferred = Deferred<Maybe<Bool>>()
+            deferred.fill(Maybe(
+                failure: TabsApiError.UnexpectedTabsError(reason: "Command queue is not initialized") as MaybeErrorType
+            ))
+            return deferred
+        }
+        return commandQueue.removeRemoteCommand(deviceId: deviceId, command: RemoteCommand.closeTab(url: url.absoluteString))
+    }
+}
+
+public class RemoteTabsCommandQueue {
+    private var commandStore: RemoteCommandStore?
+
+    public init() {}
+
+    public func openCommandStore(tabsStore: TabsStore) {
+        self.commandStore = tabsStore.newRemoteCommandStore()
+    }
+
+    public func addRemoteCommand(deviceId: String, command: RemoteCommand) -> Deferred<Maybe<Bool>> {
+        let deferred = Deferred<Maybe<Bool>>()
+
+        DispatchQueue.global().async {
+            guard let commandStore = self.commandStore else {
+                deferred.fill(Maybe(failure: TabsApiError.UnexpectedTabsError(reason: "Command store is not initialized") as MaybeErrorType))
+                return
+            }
+
+            do {
+                print("Sending url to command store")
+                print(command)
+                let result = try commandStore.addRemoteCommand(deviceId: deviceId, command: command)
+                deferred.fill(Maybe(success: result))
+            } catch {
+                deferred.fill(Maybe(failure: error as MaybeErrorType))
+            }
+        }
+
+        return deferred
+    }
+
+    public func removeRemoteCommand(deviceId: String, command: RemoteCommand) -> Deferred<Maybe<Bool>> {
+        let deferred = Deferred<Maybe<Bool>>()
+
+        DispatchQueue.global().async {
+            guard let commandStore = self.commandStore else {
+                deferred.fill(Maybe(failure: TabsApiError.UnexpectedTabsError(reason: "Command store is not initialized") as MaybeErrorType))
+                return
+            }
+
+            do {
+                let result = try commandStore.removeRemoteCommand(deviceId: deviceId, command: command)
+                deferred.fill(Maybe(success: result))
+            } catch {
+                deferred.fill(Maybe(failure: error as MaybeErrorType))
+            }
+        }
+
+        return deferred
     }
 }
 

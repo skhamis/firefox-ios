@@ -35,13 +35,15 @@ class RemoteTabsPanelMiddleware {
             store.dispatch(accountChangeAction)
         case RemoteTabsPanelActionType.refreshTabs:
             self.getSyncState(window: uuid)
+        case RemoteTabsPanelActionType.refreshTabsWithCache:
+            self.getSyncState(window: uuid, useCache: true)
         default:
             break
         }
     }
 
     // MARK: - Internal Utilities
-    private func getSyncState(window: WindowUUID) {
+    private func getSyncState(window: WindowUUID, useCache: Bool = false) {
         ensureMainThread { [self] in
             guard self.hasSyncableAccount else {
                 let action = RemoteTabsPanelAction(reason: .notLoggedIn,
@@ -67,12 +69,14 @@ class RemoteTabsPanelMiddleware {
                                                actionType: RemoteTabsPanelActionType.refreshDidBegin)
             store.dispatch(action)
 
-            getRemoteTabs(window: window)
+            getRemoteTabs(window: window, useCache: useCache)
         }
     }
 
-    private func getRemoteTabs(window: WindowUUID) {
-        profile.getClientsAndTabs { result in
+    private func getRemoteTabs(window: WindowUUID, useCache: Bool = false) {
+        let fetchClientsAndTabs: (@escaping ([ClientAndTabs]?) -> Void) -> Void
+            = useCache ? profile.getCachedClientsAndTabs : profile.getClientsAndTabs
+        fetchClientsAndTabs { result in
             guard let clientAndTabs = result else {
                 let action = RemoteTabsPanelAction(reason: .failedToSync,
                                                    windowUUID: window,
@@ -80,7 +84,6 @@ class RemoteTabsPanelMiddleware {
                 store.dispatch(action)
                 return
             }
-
             let action = RemoteTabsPanelAction(clientAndTabs: clientAndTabs,
                                                windowUUID: window,
                                                actionType: RemoteTabsPanelActionType.refreshDidSucceed)

@@ -13,7 +13,8 @@ import enum MozillaAppServices.VisitType
 class RemoteTabsTableViewController: UITableViewController,
                                      Themeable,
                                      CollapsibleTableViewSection,
-                                     LibraryPanelContextMenu {
+                                     LibraryPanelContextMenu,
+                                     FeatureFlaggable {
     struct UX {
         static let rowHeight = SiteTableViewControllerUX.RowHeight
     }
@@ -36,6 +37,12 @@ class RemoteTabsTableViewController: UITableViewController,
     private lazy var longPressRecognizer: UILongPressGestureRecognizer = {
         return UILongPressGestureRecognizer(target: self, action: #selector(longPress))
     }()
+
+    // Checks whether we have allowed the user to close tabs on other
+    // devices
+    private var closeRemoteTabsEnabled: Bool {
+        return featureFlags.isFeatureEnabled(.remoteTabManagement, checking: .buildAndUser)
+    }
 
     // MARK: - Initializer
 
@@ -277,6 +284,38 @@ class RemoteTabsTableViewController: UITableViewController,
         let tab = state.clientAndTabs[indexPath.section].tabs[indexPath.item]
         // Remote panel delegate for cell selection
         remoteTabsPanel?.remoteTabsClientAndTabsDataSourceDidSelectURL(tab.URL, visitType: VisitType.typed)
+    }
+
+    override func tableView(_ tableView: UITableView,
+                            commit editingStyle: UITableViewCell.EditingStyle,
+                            forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let clientAndTabs = state.clientAndTabs[indexPath.section]
+            let tab = clientAndTabs.tabs[indexPath.item]
+            guard let fxaDeviceId = clientAndTabs.client.fxaDeviceId else {
+                // should not get into this situation, we should probs throw an error
+                return
+            }
+            // or should we be sending the tab.clientGUID???
+            remoteTabsPanel?.remoteTabsClientAndTabsDataSourceDidCloseURL(deviceId: fxaDeviceId, url: tab.URL)
+        }
+    }
+
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        // TODO: We also need to check that the device is broadcasting the keys
+        let clientAndTabs = state.clientAndTabs[indexPath.section]
+        let tab = clientAndTabs.tabs[indexPath.item]
+        guard let fxaDeviceId = clientAndTabs.client.fxaDeviceId else {
+            // should not get into this situation, we should probs throw an error
+            return false
+        }
+        //let isDeviceCompatible = profile?.isCloseTabCompatible(fxaDeviceId: fxaDeviceId)
+        return closeRemoteTabsEnabled
+    }
+
+    override func tableView(_ tableView: UITableView,
+                            titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+         return .ContextualHints.ContextualHintsCloseAccessibility
     }
 
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {

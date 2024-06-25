@@ -62,7 +62,9 @@ class TabManagerMiddleware {
         case RemoteTabsPanelActionType.openSelectedURL:
             guard let url = action.url else { return }
             openSelectedURL(url: url, windowUUID: action.windowUUID)
-
+        case RemoteTabsPanelActionType.closeSelectedRemoteURL:
+            guard let url = action.url, let deviceId = action.deviceId else { return }
+            closeSelectedRemoteTab(deviceId: deviceId, url: url, windowUUID: action.windowUUID)
         default:
             break
         }
@@ -165,6 +167,10 @@ class TabManagerMiddleware {
                                      object: .syncTab)
         let urlRequest = URLRequest(url: url)
         self.addNewTab(with: urlRequest, isPrivate: false, for: windowUUID)
+    }
+    
+    private func closeSelectedRemoteTab(deviceId: String, url: URL, windowUUID: WindowUUID) {
+        self.profile.addTabToCommandQueue(deviceId, url: url)
     }
 
     /// Gets initial state for TabTrayModel includes panelType, if is on Private mode,

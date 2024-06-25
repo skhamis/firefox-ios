@@ -287,6 +287,10 @@ open class MockProfile: Client.Profile {
     public func storeTabs(_ tabs: [RemoteTab]) -> Deferred<Maybe<Int>> {
         return deferMaybe(0)
     }
+    
+    public func addTabToCommandQueue(_ deviceId: String, url: URL) -> Deferred<Maybe<Bool>> {
+        return deferMaybe(true)
+    }
 
     public func sendItem(_ item: ShareItem, toDevices devices: [RemoteDevice]) -> Success {
         return succeed()

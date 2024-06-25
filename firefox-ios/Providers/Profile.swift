@@ -139,6 +139,8 @@ protocol Profile: AnyObject {
     @discardableResult
     func storeTabs(_ tabs: [RemoteTab]) -> Deferred<Maybe<Int>>
 
+    func addTabToCommandQueue(_ deviceId: String, url: URL) -> Deferred<Maybe<Bool>>
+
     func sendItem(_ item: ShareItem, toDevices devices: [RemoteDevice]) -> Success
     func pollCommands(forcePoll: Bool)
 
@@ -505,6 +507,8 @@ open class BrowserProfile: Profile {
         }
 
         let remoteDeviceIds: [String] = state.remoteDevices.compactMap {
+            // Hmmm this doesn't seem right, though almost all modern clients
+            // have sendtab so I guess it's okay?
             guard $0.capabilities.contains(.sendTab) else { return nil }
             return $0.id
         }
@@ -559,6 +563,20 @@ open class BrowserProfile: Profile {
     func storeTabs(_ tabs: [RemoteTab]) -> Deferred<Maybe<Int>> {
         return self.tabs.setLocalTabs(localTabs: tabs)
     }
+    
+    func addTabToCommandQueue(_ deviceId: String, url: URL) -> Deferred<Maybe<Bool>> {
+        tabs.addRemoteCommand(deviceId: deviceId, url: url)
+    }
+    
+//    public func isCloseTabCompatible(fxaDeviceId: String) -> Bool {
+//        guard let accountManager = self.rustFxA.accountManager,
+//              let state = accountManager.deviceConstellation()?.state()
+//        else {
+//            return false
+//        }
+//
+//       
+//    }
 
     public func sendItem(_ item: ShareItem, toDevices devices: [RemoteDevice]) -> Success {
         let deferred = Success()

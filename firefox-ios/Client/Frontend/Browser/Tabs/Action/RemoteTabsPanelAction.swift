@@ -11,15 +11,18 @@ class RemoteTabsPanelAction: Action {
     let clientAndTabs: [ClientAndTabs]?
     let reason: RemoteTabsPanelEmptyStateReason?
     let url: URL?
+    let deviceId: String?
 
     init(clientAndTabs: [ClientAndTabs]? = nil,
          reason: RemoteTabsPanelEmptyStateReason? = nil,
          url: URL? = nil,
+         deviceId: String? = nil,
          windowUUID: WindowUUID,
          actionType: ActionType) {
         self.clientAndTabs = clientAndTabs
         self.reason = reason
         self.url = url
+        self.deviceId = deviceId
         super.init(windowUUID: windowUUID,
                    actionType: actionType)
     }
@@ -28,8 +31,10 @@ class RemoteTabsPanelAction: Action {
 enum RemoteTabsPanelActionType: ActionType {
     case panelDidAppear
     case refreshTabs
+    case refreshTabsWithCache
     case refreshDidBegin
     case refreshDidFail
     case refreshDidSucceed
     case openSelectedURL
+    case closeSelectedRemoteURL
 }

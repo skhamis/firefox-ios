@@ -65,11 +65,13 @@ class RemoteTabsPanel: UIViewController,
 
     // MARK: - Internal Utilities
 
-    private func refreshTabs() {
+    private func refreshTabs(useCache: Bool = false) {
         // Ensure we do not already have a refresh in progress
         guard state.refreshState != .refreshing else { return }
+        let actionType =
+            useCache ? RemoteTabsPanelActionType.refreshTabsWithCache : RemoteTabsPanelActionType.refreshTabs
         let action = RemoteTabsPanelAction(windowUUID: windowUUID,
-                                           actionType: RemoteTabsPanelActionType.refreshTabs)
+                                           actionType: actionType)
         store.dispatch(action)
     }
 
@@ -146,6 +148,10 @@ class RemoteTabsPanel: UIViewController,
         handleOpenSelectedURL(url)
     }
 
+    func remoteTabsClientAndTabsDataSourceDidCloseURL(deviceId: String, url: URL) {
+        handleCloseRemoteTab(deviceId, url: url)
+    }
+
     // MARK: - RemotePanelDelegate
     func remotePanelDidRequestToSignIn() {
         remoteTabsDelegate?.presentFirefoxAccountSignIn()
@@ -168,5 +174,16 @@ class RemoteTabsPanel: UIViewController,
                                            windowUUID: windowUUID,
                                            actionType: RemoteTabsPanelActionType.openSelectedURL)
         store.dispatch(action)
+    }
+
+    private func handleCloseRemoteTab(_ deviceId: String, url: URL) {
+        let action = RemoteTabsPanelAction(url: url,
+                                           deviceId: deviceId,
+                                           windowUUID: windowUUID,
+                                           actionType: RemoteTabsPanelActionType.closeSelectedRemoteURL)
+        store.dispatch(action)
+        // Once we add the tab to the command queue, the tab store will start removing it from
+        // the list, so refresh the tabs
+        refreshTabs(useCache: true)
     }
 }
