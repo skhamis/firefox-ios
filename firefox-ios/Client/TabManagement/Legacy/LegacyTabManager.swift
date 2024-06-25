@@ -632,6 +632,16 @@ class LegacyTabManager: NSObject, FeatureFlaggable, TabManager, TabEventHandler 
     }
 
     @MainActor
+    func removeTabByUrl(_ url: URL) async -> Bool {
+        let nonPrivateTabs = tabs.filter { !$0.isPrivate }
+        if let tabToClose = nonPrivateTabs.first(where: { $0.url == url }) {
+            await self.removeTab(tabToClose.tabUUID)
+            return true
+        }
+        return false
+    }
+
+    @MainActor
     func removeAllTabs(isPrivateMode: Bool) async {
         let currentModeTabs = tabs.filter { $0.isPrivate == isPrivateMode }
         if let tab = selectedTab, tab.isPrivate == isPrivateMode {

@@ -83,6 +83,9 @@ protocol TabManager: AnyObject {
     /// Undo close all tabs, it will restore the tabs that were backed up when the close action was called.
     func undoCloseAllTabs()
 
+    /// Removes first tab found, used when other clients requesting to close tabs on this device.
+    func removeTabByUrl(_ url: URL) async -> Bool
+
     /// Get inactive tabs from the list of tabs based on the time condition to be considered inactive.
     /// Replaces LegacyInactiveTabModel and related classes
     /// 
