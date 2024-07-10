@@ -49,11 +49,9 @@ class AppFxACommandsDelegate: FxACommandsDelegate {
     }
 
     func closeTabs(for urls: [URL]) {
-        mainQueue.async {
-            Task {
-                for url in urls {
-                    await self.applicationHelper.closeTab(url)
-                }
+        Task {
+            for url in urls {
+                await self.applicationHelper.closeTab(url)
             }
         }
     }

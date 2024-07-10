@@ -55,12 +55,10 @@ struct DefaultApplicationHelper: ApplicationHelper {
     /// - Parameters:
     ///   - url: the URL requested to be closed
     func closeTab(_ url: URL) async {
-    // We need to get all the windows/tabs and then find the url that was requested to close
         let windowManager = AppContainer.shared.resolve() as WindowManager
-        for tabManager in windowManager.allWindowTabManagers() {
-                if await tabManager.removeTabByUrl(url) {
-                    break
-                }
-        }
+        for tabManager in windowManager.allWindowTabManagers() where
+            await tabManager.removeTabByUrl(url) {
+                break
+            }
     }
 }
